@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Violence Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="header">
+            <div class="eyebrow">
+                <span class="dot"></span>
+                <span>Model online — ready for input</span>
+            </div>
+            <h1>Violence Detection</h1>
+            <p>Upload a clip. The model scores every frame for violent activity.</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" id="uploadForm">
+
+            <div class="upload-box" id="uploadBox">
+                <div class="upload-icon">▶</div>
+                <h2>Select a video</h2>
+                <p>MP4, MOV, AVI — analyzed frame by frame</p>
+
+                <label for="videoInput" class="choose-button">Choose file</label>
+                <input type="file" id="videoInput" name="video" accept="video/*" required>
+
+                <p id="fileName" class="file-name"></p>
+            </div>
+
+            <div id="previewContainer" class="preview-container">
+                <h3>Queued for analysis</h3>
+                <div class="video-frame">
+                    <video id="videoPreview" controls></video>
+                    <span class="corner tl"></span>
+                    <span class="corner tr"></span>
+                    <span class="corner bl"></span>
+                    <span class="corner br"></span>
+                    <span class="rec-tag"><span class="rec-dot"></span>SRC</span>
+                </div>
+            </div>
+
+            <button type="submit" class="detect-button" id="detectButton">
+                Run detection
+            </button>
+
+        </form>
+
+    </div>
+
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <h2>Analyzing footage</h2>
+        <p>Running frame-by-frame inference — this can take a moment.</p>
+    </div>
+
+    <script>
+        const videoInput = document.getElementById("videoInput");
+        const videoPreview = document.getElementById("videoPreview");
+        const previewContainer = document.getElementById("previewContainer");
+        const fileName = document.getElementById("fileName");
+        const uploadForm = document.getElementById("uploadForm");
+        const loading = document.getElementById("loading");
+        const detectButton = document.getElementById("detectButton");
+
+        videoInput.addEventListener("change", function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            fileName.textContent = file.name;
+
+            const videoURL = URL.createObjectURL(file);
+            videoPreview.src = videoURL;
+
+            previewContainer.style.display = "block";
+        });
+
+        uploadForm.addEventListener("submit", function () {
+            loading.style.display = "flex";
+            detectButton.disabled = true;
+            detectButton.textContent = "Processing…";
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,26 @@
+# Virtual environment
+venv/
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Uploaded videos
+uploads/
+
+# Local test videos
+test_videos/
+
+# Dataset
+dataset/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Environment / secret files
+.env
+
+# OS files
+.DS_Store
+Thumbs.db

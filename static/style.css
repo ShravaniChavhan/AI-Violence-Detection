@@ -1,0 +1,571 @@
+/* ==========================================================================
+   SENTRY — video threat analysis console
+   Design language: dark ops console + camera on-screen-display (OSD)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+    --bg: #0a0e13;
+    --bg-grid: #0d131a;
+    --panel: #10161d;
+    --panel-raised: #141b23;
+    --border: #212b35;
+    --border-soft: #1a232c;
+
+    --text: #e7edf3;
+    --text-muted: #7c8a97;
+    --text-dim: #4a5763;
+
+    --cyan: #3fd6e8;
+    --cyan-dim: #1c4a52;
+    --red: #ff4f56;
+    --red-dim: #4a1417;
+    --green: #34d399;
+    --green-dim: #123328;
+    --amber: #f5b94d;
+
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    --radius: 3px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    font-family: var(--font-body);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 32px 20px;
+    color: var(--text);
+    background:
+        radial-gradient(circle at 20% -10%, rgba(63, 214, 232, 0.06), transparent 45%),
+        radial-gradient(circle at 100% 100%, rgba(255, 79, 86, 0.04), transparent 40%),
+        repeating-linear-gradient(0deg, var(--bg-grid) 0px, var(--bg-grid) 1px, var(--bg) 1px, var(--bg) 34px),
+        repeating-linear-gradient(90deg, var(--bg-grid) 0px, var(--bg-grid) 1px, var(--bg) 1px, var(--bg) 34px),
+        var(--bg);
+}
+
+::selection {
+    background: var(--cyan);
+    color: #041012;
+}
+
+/* --------------------------------------------------------------------
+   Container / console frame
+   -------------------------------------------------------------------- */
+
+.container {
+    width: 100%;
+    max-width: 620px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.4),
+        0 30px 80px -20px rgba(0, 0, 0, 0.7),
+        0 0 60px -25px rgba(63, 214, 232, 0.15);
+    overflow: hidden;
+    position: relative;
+}
+
+.container::before {
+    /* top hairline accent */
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity: 0.7;
+}
+
+/* --------------------------------------------------------------------
+   Header — system status bar
+   -------------------------------------------------------------------- */
+
+.header {
+    padding: 28px 36px 22px;
+    border-bottom: 1px solid var(--border-soft);
+    text-align: left;
+    position: relative;
+}
+
+.header .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+}
+
+.header .eyebrow .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse-dot 2.2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+}
+
+h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    margin-bottom: 6px;
+}
+
+.header p {
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+/* --------------------------------------------------------------------
+   Upload zone
+   -------------------------------------------------------------------- */
+
+form {
+    padding: 30px 36px 34px;
+}
+
+.upload-box {
+    position: relative;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 42px 24px;
+    text-align: center;
+    background: var(--panel-raised);
+    overflow: hidden;
+    transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+.upload-box:hover {
+    border-color: var(--cyan-dim);
+    background: #121a22;
+}
+
+/* scanning beam signature element */
+.upload-box::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 40%;
+    background: linear-gradient(180deg, rgba(63, 214, 232, 0.09), transparent);
+    transform: translateY(-100%);
+    animation: scan-sweep 3.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    pointer-events: none;
+}
+
+@keyframes scan-sweep {
+    0%   { transform: translateY(-100%); }
+    55%  { transform: translateY(250%); }
+    100% { transform: translateY(250%); }
+}
+
+.upload-icon {
+    font-size: 30px;
+    margin-bottom: 14px;
+    filter: grayscale(1) brightness(1.6);
+    opacity: 0.85;
+}
+
+.upload-box h2 {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text);
+}
+
+.upload-box p {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 22px;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.choose-button {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    border: 1px solid var(--cyan-dim);
+    background: rgba(63, 214, 232, 0.06);
+    padding: 11px 22px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.choose-button:hover {
+    background: rgba(63, 214, 232, 0.14);
+    border-color: var(--cyan);
+}
+
+.file-name {
+    margin-top: 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    word-break: break-all;
+}
+
+.file-name:not(:empty)::before {
+    content: "▸ ";
+    color: var(--cyan);
+}
+
+/* --------------------------------------------------------------------
+   Video preview — camera OSD framing
+   -------------------------------------------------------------------- */
+
+.preview-container {
+    display: none;
+    margin-top: 22px;
+    position: relative;
+}
+
+.preview-container h3 {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+.video-frame {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #000;
+    border: 1px solid var(--border);
+}
+
+.video-frame video,
+.result-video video {
+    display: block;
+    width: 100%;
+    max-height: 360px;
+    background: #000;
+}
+
+/* corner brackets, like a camera viewfinder */
+.corner {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--cyan);
+    opacity: 0.85;
+    pointer-events: none;
+}
+.corner.tl { top: 8px; left: 8px; border-right: none; border-bottom: none; }
+.corner.tr { top: 8px; right: 8px; border-left: none; border-bottom: none; }
+.corner.bl { bottom: 8px; left: 8px; border-right: none; border-top: none; }
+.corner.br { bottom: 8px; right: 8px; border-left: none; border-top: none; }
+
+.rec-tag {
+    position: absolute;
+    top: 8px;
+    left: 30px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 3px 7px;
+    border-radius: 2px;
+}
+
+.rec-tag .rec-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--red);
+    animation: pulse-dot 1.4s ease-in-out infinite;
+}
+
+/* --------------------------------------------------------------------
+   Submit button
+   -------------------------------------------------------------------- */
+
+.detect-button {
+    width: 100%;
+    margin-top: 26px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #04131a;
+    background: var(--cyan);
+    border: none;
+    padding: 15px 20px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.detect-button:hover {
+    opacity: 0.88;
+}
+
+.detect-button:active {
+    transform: scale(0.99);
+}
+
+.detect-button:disabled {
+    background: var(--border);
+    color: var(--text-dim);
+    cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------
+   Loading overlay
+   -------------------------------------------------------------------- */
+
+.loading {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 9, 12, 0.92);
+    backdrop-filter: blur(3px);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    text-align: center;
+    padding: 20px;
+}
+
+.spinner {
+    width: 46px;
+    height: 46px;
+    border: 2px solid var(--border);
+    border-top-color: var(--cyan);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    margin-bottom: 22px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading h2 {
+    font-family: var(--font-display);
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: var(--text);
+}
+
+.loading p {
+    color: var(--text-muted);
+    font-size: 13px;
+    font-family: var(--font-mono);
+}
+
+/* --------------------------------------------------------------------
+   Result page
+   -------------------------------------------------------------------- */
+
+.result-page .header {
+    text-align: left;
+}
+
+.result-video {
+    padding: 30px 36px 0;
+}
+
+.result-video .video-frame {
+    border: 1px solid var(--border);
+}
+
+.result-section {
+    padding: 26px 36px 0;
+}
+
+.result-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+.prediction {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    padding: 6px 0;
+}
+
+.prediction::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.prediction.violence {
+    color: var(--red);
+}
+.prediction.violence::before {
+    background: var(--red);
+    box-shadow: 0 0 12px var(--red);
+}
+
+.prediction.nonviolence {
+    color: var(--green);
+}
+.prediction.nonviolence::before {
+    background: var(--green);
+    box-shadow: 0 0 12px var(--green);
+}
+
+.confidence {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+}
+
+/* segmented equalizer-style meter instead of a plain gradient bar */
+.progress-container {
+    display: flex;
+    gap: 3px;
+    width: 100%;
+    height: 22px;
+    margin-bottom: 8px;
+}
+
+.progress-container .seg {
+    flex: 1;
+    border-radius: 1px;
+    background: var(--border-soft);
+    transition: background 0.25s ease;
+}
+
+.progress-container .seg.filled {
+    background: var(--meter-color, var(--cyan));
+}
+
+.result-section:last-of-type {
+    padding-bottom: 6px;
+}
+
+.scale-labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-bottom: 26px;
+}
+
+.footer-row {
+    padding: 26px 36px 32px;
+    border-top: 1px solid var(--border-soft);
+    margin-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.timestamp {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.back-link:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+}
+
+/* --------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------- */
+
+@media (max-width: 480px) {
+    .header, form, .result-video, .result-section, .footer-row {
+        padding-left: 22px;
+        padding-right: 22px;
+    }
+
+    h1 { font-size: 23px; }
+    .prediction { font-size: 24px; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .upload-box::after,
+    .header .eyebrow .dot,
+    .rec-tag .rec-dot,
+    .spinner {
+        animation: none;
+    }
+}
+
+/* Keyboard focus visibility */
+a:focus-visible,
+button:focus-visible,
+label:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+}
